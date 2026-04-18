@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" type="text/css" href="css/mystyles.css"/>
+  <script type="module" src="https://public.tableau.com/javascripts/api/tableau.embedding.3.latest.min.js"></script>
+  <title>Scratch Page</title>  
+</head>
+
+<body>
+
+
+  <div class="header">
+     <nav>
+    <a href="index.html">Home</a>           
+    <a href="Resume.html">Resume</a>
+    <a href="fromScratch.html">Fitness</a>
+    <a href="ai.html">Game</a>
+    <a href="#myViz">Workout Routine</a>
+  </nav>
+    <h1>A Gentleman's Guide to Getting Jacked </h1>   
+    <p class="subtitle">"It is a shame for a man to grow old without seeing the beauty and strength of which his body is capable." -Socrates</p>
+  </div>
+ 
+ 
+  <main>
+ 
+    <div class="mainbody">
+      <figure>
+        <img
+          class="hero-image" src="assets/img/socrates.png"
+        />
+      </figure>
+    </div>
+ 
+
+    <div class="mainbody">
+      <h2>The 3 Pillars of Gaining Serious Mass</h2>
+ 
+      <!-- LIST 1 -->
+      <h3>Excercise</h3>
+      <ol class="bullets">
+        <li>Progressive Overload
+          <ul>
+            <li>Gradually increase weight, reps, or intensity each week</li>
+            <li>Forces muscles to adapt → growth occurs due to mechanical tension</li>
+          </ul>
+        </li>
+        <li>Compound Movements
+          <ul>
+            <li>Squats → train legs, core, and stabilize joints</li>
+            <li>Bench press → chest, shoulders, triceps simultaneously</li>
+            <li>Deadlifts → full posterior chain (back, glutes, hamstrings)</li>
+            <li>A compount movement is an excercise that involves multiple muscle groups</li>
+          </ul>
+        </li>
+        <li>Consistency
+          <ul>
+            <li>Training 3-5x per week is optimal because muscle protein synthesis spikes for ~24-48 hours after lifting</li>
+          </ul>
+        </li>
+      </ol>
+
+      <h3>Nutrition</h3>
+      <ol class="bullets">
+        <li>Eat in a Caloric Surplus
+          <ul>
+            <li>Consume ~250-500 extra calories/day</li>
+            <li>Energy surplus is required because building tissue requires more energy than maintaining</li>
+          </ul>
+        </li>
+        <li>Prioritize Protein Intake
+          <ul>
+            <li>Aim for ~0.7-1g protein per pound of body weight (supports muscle repair via amino acids)</li>
+          </ul>
+        </li>
+        <li>Balance Micro and Macronutrients
+          <ul>
+            <li>Carbs fuel workouts (glycogen = primary energy source for lifting)</li>
+            <li>Fats regulate hormones like testosterone (critical for muscle)</li>
+            <li>vegetables supply nutrients necessary for everthing else</li>
+          </ul>
+        </li>
+      </ol>
+ 
+      <h3>Recovery</h3>
+      <ol class="bullets">
+        <li>Sleep
+          <ul>
+            <li>7-9 hours per night → growth hormone release peaks during deep sleep</li>
+          </ul>
+        </li>
+        <li>Rest & Active Recovery
+          <ul>
+            <li>Rest days prevent overtraining (Central Nervous System fatigue + muscle breakdown)</li>
+            <li>Light movement (walking, stretching) increases blood flow → faster recovery</li>
+          </ul>
+        </li>
+      </ol>
+    </div>
+ 
+ 
+    <div id="walkthrough">
+      <h2 style="text-align: center;">Watch this series for a more thorough treatise on the art of gains</h2>
+      <div class="video-wrapper">
+        <iframe
+          src="https://www.youtube.com/embed/TN9i9Ni0Xr4?start=339"
+          title="YouTube video"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowfullscreen>
+        </iframe>
+      </div>
+    </div>
+   
+    <tableau-viz class="video-wrapper"
+      id="myViz"
+      src="https://public.tableau.com/views/Excercise_15952761426040/Routine"
+      width="1200px"
+      height="827px"
+      toolbar="bottom"
+      hide-tabs>
+    </tableau-viz>
+ 
+  </main>
+ 
+ 
+  <footer>
+    <p>&copy; 2026 Scott Curtis</p>   
+  </footer>
+ 
+</body>
+</html>

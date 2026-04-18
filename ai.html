@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>.</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #fff;
+    font-family: "Times New Roman", Times, serif;
+    overflow: hidden;
+    width: 100vw; height: 100vh;
+    cursor: default;
+  }
+ 
+  /* confetti canvas always on top */
+  #confetti-canvas {
+    position: fixed; top: 0; left: 0;
+    pointer-events: none; z-index: 400;
+  }
+ 
+  /* ══ LEVEL 1 ══ */
+  #level1 { position: fixed; inset: 0; background: #fff; }
+ 
+  #word-canvas {
+    position: absolute; top: 0; left: 0;
+    cursor: default;
+  }
+
+  #level1-hint {
+    position: absolute;
+    top: 6px; left: 50%;
+    transform: translateX(-50%);
+    font-family: "Times New Roman", serif;
+    font-size: 0.9rem;
+    color: #000;
+    pointer-events: none;
+    z-index: 5;
+    user-select: none;
+  }
+ 
+  /* eraser cursor visual */
+  #eraser {
+    position: fixed;
+    width: 82px; height: 82px;
+    border: 2px solid #000;
+    border-radius: 3px;
+    pointer-events: none;
+    z-index: 200;
+    transform: translate(-50%, -50%);
+    display: none;
+  }
+ 
+  /* RPO overlay — plain centered text, fades in */
+  #rpo-block {
+    position: fixed; top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: "Times New Roman", serif;
+    font-size: 2.6rem; color: #000;
+    white-space: nowrap;
+    opacity: 0; pointer-events: none;
+    transition: opacity 1.8s ease, top 0.75s cubic-bezier(.18,.89,.32,1.28), left 0.12s linear;
+    z-index: 50; user-select: none;
+  }
+  #rpo-block.visible { opacity: 1; }
+  #rpo-block.ready-to-drop { pointer-events: auto; cursor: pointer; }
+  #rpo-block.ready-to-slide { pointer-events: auto; cursor: grab; }
+  #rpo-block.dragging { cursor: grabbing; transition: none; }
+ 
+  /* ══ LEVEL 2 ══ */
+  #level2 {
+    position: fixed; inset: 0; background: #fff;
+    display: none; overflow: hidden;
+  }
+  #bg-text {
+    position: absolute; inset: 0;
+    font-family: "Times New Roman", serif;
+    font-size: 1rem; line-height: 1.7; color: #000;
+    padding: 14px; word-break: break-word;
+    pointer-events: none; overflow: hidden;
+  }
+  /* white rectangle punched out of the middle for writing */
+  #poem-clear {
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 400px; height: 200px;
+    background: #fff;
+    z-index: 5;
+  }
+  #poem-input {
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 380px; height: 180px;
+    background: transparent;
+    border: none; outline: none; resize: none;
+    font-family: "Times New Roman", serif;
+    font-size: 1rem; color: #000; caret-color: #000;
+    z-index: 10; padding: 8px;
+  }
+  #poem-submit {
+    position: absolute; bottom: 24px; right: 30px;
+    background: transparent; border: 1px solid #000;
+    font-family: "Times New Roman", serif;
+    font-size: 0.85rem; padding: 3px 10px;
+    cursor: pointer; z-index: 10; color: #000;
+  }
+  #poem-submit:hover { background: #000; color: #fff; }
+  #poem-feedback {
+    position: absolute; bottom: 56px; right: 30px;
+    font-family: "Times New Roman", serif;
+    font-size: 0.8rem; color: #000; z-index: 10;
+  }
+ 
+  /* ══ HOT MSG ══ */
+  #hot-msg {
+    position: fixed; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    pointer-events: none; opacity: 0; z-index: 150;
+    transition: opacity 0.5s; background: #fff;
+  }
+  #hot-msg span { font-family: "Times New Roman", serif; font-size: 3rem; color: #000; }
+ 
+  /* ══ LEVEL 3 ══ */
+  #level3 {
+    position: fixed; inset: 0;
+    background:
+      linear-gradient(180deg, rgba(255,255,255,0.04), rgba(16, 55, 22, 0.16)),
+      url("assets/img/jackpot.png") center center / cover no-repeat;
+    display: none; overflow: hidden;
+  }
+  #fantasy-scene {
+    position: absolute; inset: 0;
+    overflow: hidden; pointer-events: none;
+    display: none;
+  }
+  #rainbow {
+    position: absolute;
+    top: 7vh; left: 50%;
+    width: min(980px, 92vw);
+    height: min(520px, 52vw);
+    transform: translateX(-50%);
+    overflow: hidden;
+    opacity: 0.95;
+  }
+  #rainbow .band {
+    position: absolute;
+    left: 50%;
+    border-radius: 50%;
+    transform: translateX(-50%);
+    border-style: solid;
+    border-bottom: none;
+    background: transparent;
+  }
+  #rainbow .red { width: 100%; height: 100%; border-width: 28px; border-color: #ff5f57; }
+  #rainbow .orange { width: calc(100% - 48px); height: calc(100% - 48px); top: 24px; border-width: 26px; border-color: #ffa23a; }
+  #rainbow .yellow { width: calc(100% - 92px); height: calc(100% - 92px); top: 46px; border-width: 24px; border-color: #ffd84d; }
+  #rainbow .green { width: calc(100% - 136px); height: calc(100% - 136px); top: 68px; border-width: 22px; border-color: #6ccf67; }
+  #rainbow .blue { width: calc(100% - 176px); height: calc(100% - 176px); top: 88px; border-width: 20px; border-color: #54a8ff; }
+  #rainbow .violet { width: calc(100% - 214px); height: calc(100% - 214px); top: 107px; border-width: 18px; border-color: #9a74ff; }
+  .cloud {
+    position: absolute;
+    background: rgba(255,255,255,0.88);
+    border-radius: 999px;
+    box-shadow:
+      32px -18px 0 6px rgba(255,255,255,0.9),
+      66px -6px 0 4px rgba(255,255,255,0.85),
+      12px -10px 0 4px rgba(255,255,255,0.9);
+  }
+  .cloud-a { top: 9vh; left: 12vw; width: 108px; height: 34px; }
+  .cloud-b { top: 14vh; right: 16vw; width: 124px; height: 38px; }
+  .cloud-c { top: 22vh; left: 18vw; width: 96px; height: 30px; }
+  .hill {
+    position: absolute;
+    bottom: 0;
+    border-radius: 50% 50% 0 0;
+  }
+  .hill-back {
+    width: 58vw; height: 30vh;
+    background: #5aa45d;
+    opacity: 0.95;
+  }
+  .hill-left { left: -8vw; }
+  .hill-right { right: -12vw; height: 34vh; background: #46985a; }
+  .hill-mid {
+    width: 44vw; height: 26vh;
+    background: #73b867;
+    left: 28vw; bottom: 7vh;
+  }
+  #garden-strip {
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    height: 22vh;
+    background:
+      radial-gradient(circle at 8% 58%, #ff6ca8 0 4px, transparent 5px),
+      radial-gradient(circle at 15% 42%, #ffd84d 0 4px, transparent 5px),
+      radial-gradient(circle at 24% 66%, #ff7a59 0 4px, transparent 5px),
+      radial-gradient(circle at 33% 40%, #8e67ff 0 4px, transparent 5px),
+      radial-gradient(circle at 43% 62%, #ff6ca8 0 4px, transparent 5px),
+      radial-gradient(circle at 56% 46%, #ffd84d 0 4px, transparent 5px),
+      radial-gradient(circle at 68% 65%, #ff7a59 0 4px, transparent 5px),
+      radial-gradient(circle at 79% 40%, #8e67ff 0 4px, transparent 5px),
+      radial-gradient(circle at 89% 58%, #ffd84d 0 4px, transparent 5px),
+      linear-gradient(180deg, rgba(131, 186, 104, 0) 0%, #4f9b54 32%, #37783c 100%);
+  }
+  #riddle-poem {
+    position: absolute; top: 22%; left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    font-family: "Times New Roman", serif;
+    font-size: clamp(1rem, 1.15rem, 1.2rem);
+    line-height: 2.1; color: #123018;
+    text-shadow: 0 1px 0 rgba(255,255,255,0.75);
+    background: rgba(255,255,255,0.58);
+    padding: 12px 18px;
+    border-radius: 8px;
+    width: min(700px, 88vw);
+    z-index: 4;
+  }
+  #chess-form {
+    position: absolute; bottom: 178px; left: 50%;
+    transform: translateX(-50%);
+    display: flex; gap: 8px; align-items: center;
+    z-index: 4;
+  }
+  #chess-input {
+    background: rgba(255,255,255,0.72); border: none; border-bottom: 1px solid #17351d;
+    font-family: "Times New Roman", serif; font-size: 1rem;
+    width: min(260px, 52vw); outline: none; color: #17351d; padding: 4px 6px;
+  }
+  #chess-submit {
+    background: rgba(255,255,255,0.78); border: 1px solid #17351d;
+    font-family: "Times New Roman", serif; font-size: 0.85rem;
+    padding: 4px 12px; cursor: pointer; color: #17351d;
+  }
+  #chess-submit:hover { background: #17351d; color: #fff; }
+  #chess-feedback {
+    position: absolute; bottom: 144px; left: 50%;
+    transform: translateX(-50%);
+    font-family: "Times New Roman", serif; font-size: 0.85rem;
+    color: #17351d; white-space: nowrap;
+    z-index: 4;
+  }
+ 
+  /* ══ VIDEO ══ */
+  #video-overlay {
+    position: fixed; inset: 0;
+    background:
+      radial-gradient(circle at 50% 16%, rgba(255, 236, 137, 0.45), transparent 26%),
+      linear-gradient(180deg, rgba(17, 53, 22, 0.84), rgba(5, 24, 12, 0.94)),
+      url("assets/img/jackpot.png") center center / cover no-repeat;
+    display: none; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 16px;
+    z-index: 300; opacity: 0; transition: opacity 1s ease;
+    padding: 28px;
+  }
+  #video-overlay.visible { display: flex; opacity: 1; }
+  #video-overlay::before {
+    content: "";
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(circle at 18% 22%, rgba(255, 218, 84, 0.26), transparent 18%),
+      radial-gradient(circle at 82% 72%, rgba(255, 255, 255, 0.18), transparent 20%);
+    pointer-events: none;
+  }
+  #as-you-wish {
+    position: relative;
+    font-family: "Times New Roman", serif;
+    font-size: clamp(2.1rem, 5vw, 4.4rem);
+    color: #fff7bf;
+    letter-spacing: 4px;
+    text-shadow: 0 4px 18px rgba(0,0,0,0.55), 0 0 22px rgba(255, 216, 77, 0.75);
+    text-align: center;
+  }
+  #ending-card {
+    position: relative;
+    width: min(820px, 92vw);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+  }
+  #yt-frame {
+    width: min(760px, 90vw);
+    aspect-ratio: 16/9;
+    border: 2px solid rgba(255, 235, 145, 0.9);
+    box-shadow: 0 22px 48px rgba(0,0,0,0.45), 0 0 34px rgba(255, 216, 77, 0.35);
+    background: #000;
+  }
+  #home-link {
+    position: relative;
+    display: inline-block;
+    font-family: "Times New Roman", serif;
+    font-size: 1rem;
+    color: #16351a;
+    background: linear-gradient(180deg, #fff7bf, #e4b93f);
+    border: 1px solid #fff1a1;
+    border-radius: 8px;
+    padding: 8px 18px;
+    text-decoration: none;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.28);
+  }
+  #home-link:hover {
+    background: #fff7bf;
+  }
+</style>
+</head>
+<body>
+ 
+<canvas id="confetti-canvas"></canvas>
+<div id="eraser"></div>
+ 
+<!-- LEVEL 1 -->
+<div id="level1">
+  <div id="level1-hint">find the start button</div>
+  <canvas id="word-canvas"></canvas>
+</div>
+<div id="rpo-block">ready player one</div>
+ 
+<!-- LEVEL 2 -->
+<div id="level2">
+  <div id="bg-text"></div>
+  <div id="poem-clear"></div>
+  <textarea id="poem-input" spellcheck="false" autocomplete="off"></textarea>
+  <div id="poem-feedback"></div>
+  <button id="poem-submit">enter</button>
+</div>
+ 
+<div id="hot-msg"><span>That poem was Hot!</span></div>
+ 
+<!-- LEVEL 3 -->
+<div id="level3">
+  <div id="fantasy-scene" aria-hidden="true">
+    <div class="cloud cloud-a"></div>
+    <div class="cloud cloud-b"></div>
+    <div class="cloud cloud-c"></div>
+    <div id="rainbow">
+      <span class="band red"></span>
+      <span class="band orange"></span>
+      <span class="band yellow"></span>
+      <span class="band green"></span>
+      <span class="band blue"></span>
+      <span class="band violet"></span>
+    </div>
+    <div class="hill hill-back hill-left"></div>
+    <div class="hill hill-back hill-right"></div>
+    <div class="hill hill-mid"></div>
+    <div id="garden-strip"></div>
+  </div>
+  <div id="riddle-poem">
+    In order to embrace these jewels you have to follow all my rules<br>
+    And if you're thinking this is fun just know your work has just begun<br>
+    For there's a secret you must learn that one could only hope to earn,<br>
+    "Fetch me this cup" a girl once said--but what if it was you instead?
+  </div>
+  <div id="chess-form">
+    <input id="chess-input" type="text" autocomplete="off"/>
+    <button id="chess-submit">answer</button>
+  </div>
+  <div id="chess-feedback"></div>
+</div>
+ 
+<div id="video-overlay">
+  <div id="as-you-wish">as you wish.</div>
+  <div id="ending-card">
+    <iframe id="yt-frame" src="" frameborder="0"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+      allowfullscreen></iframe>
+    <a id="home-link" href="index.html">return home</a>
+  </div>
+</div>
+ 
+<script>
+// ══════════════════════════════════════
+// CONFETTI
+// ══════════════════════════════════════
+const confCanvas = document.getElementById('confetti-canvas');
+const confCtx = confCanvas.getContext('2d');
+confCanvas.width = window.innerWidth;
+confCanvas.height = window.innerHeight;
+window.addEventListener('resize', () => {
+  confCanvas.width = window.innerWidth;
+  confCanvas.height = window.innerHeight;
+});
+let confetti = [];
+function launchConfetti() {
+  for (let i = 0; i < 260; i++) {
+    confetti.push({
+      x: Math.random() * confCanvas.width,
+      y: -10 - Math.random() * 300,
+      w: 5 + Math.random() * 9, h: 3 + Math.random() * 6,
+      color: ['#000','#333','#666','#999','#ccc'][Math.floor(Math.random()*5)],
+      vx: (Math.random()-0.5)*6, vy: 2+Math.random()*5,
+      rot: Math.random()*360, vrot: (Math.random()-0.5)*12, life: 1
+    });
+  }
+  animateConfetti();
+}
+function animateConfetti() {
+  confCtx.clearRect(0,0,confCanvas.width,confCanvas.height);
+  confetti = confetti.filter(p=>p.life>0);
+  confetti.forEach(p=>{
+    confCtx.save();
+    confCtx.translate(p.x,p.y); confCtx.rotate(p.rot*Math.PI/180);
+    confCtx.globalAlpha=p.life; confCtx.fillStyle=p.color;
+    confCtx.fillRect(-p.w/2,-p.h/2,p.w,p.h);
+    confCtx.restore();
+    p.x+=p.vx; p.y+=p.vy; p.rot+=p.vrot; p.vy+=0.15; p.life-=0.007;
+  });
+  if (confetti.length>0) requestAnimationFrame(animateConfetti);
+  else confCtx.clearRect(0,0,confCanvas.width,confCanvas.height);
+}
+ 
+// ══════════════════════════════════════
+// LEVEL 1 — ERASER MECHANIC
+// ══════════════════════════════════════
+const wCanvas = document.getElementById('word-canvas');
+const wCtx = wCanvas.getContext('2d');
+wCanvas.width = window.innerWidth;
+wCanvas.height = window.innerHeight;
+ 
+const eraserEl = document.getElementById('eraser');
+const ERASER_W = 82;
+const ERASER_H = 82;
+ 
+const FONT_SIZE = 16;
+const FONT_STR = `${FONT_SIZE}px "Times New Roman", serif`;
+const LINE_H = 26;
+const WORD_GAP = 10;
+const MARGIN = 30;
+ 
+wCtx.font = FONT_STR;
+ 
+// ── word bank ──
+const wordBank = [
+  'the','and','of','to','a','in','is','it','you','that','he','was','for',
+  'on','are','with','as','his','they','be','at','one','have','this','from',
+  'or','had','by','but','not','what','all','were','we','when','your','can',
+  'said','there','use','an','each','which','she','do','how','their','if',
+  'will','up','other','about','out','many','then','them','these','so','some',
+  'her','would','make','like','him','into','time','has','look','two','more',
+  'go','see','no','way','could','my','than','first','been','its','who','now',
+  'people','over','down','only','may','after','before','must','well','back',
+  'also','around','another','came','come','work','three','word','long','little',
+  'very','thing','place','every','found','still','should','between','under',
+  'never','same','last','thought','city','tree','start','ready','go','begin','game','button',
+  'where','find','press','play','find','almost','player','intro','wes','princess',
+  'bride','butter','giant','gold','peanut','castle','kingdom','book','poison',
+  'mask','fairytail','time','once','upon','awesome','true','love','kiss','romance',
+  'movie','britain','soccer','easter','church','farm','work','grass','hill',
+
+];
+ 
+// ── build word positions (book-page layout) ──
+let words = []; // { text, x, y, w, erased }
+ 
+function buildWords() {
+  words = [];
+  let cx = MARGIN, cy = MARGIN + FONT_SIZE;
+
+  while (cy <= wCanvas.height - MARGIN) {
+    const text = wordBank[Math.floor(Math.random() * wordBank.length)];
+    const w = wCtx.measureText(text).width;
+
+    if (cx + w > wCanvas.width - MARGIN) {
+      cx = MARGIN;
+      cy += LINE_H;
+
+      if (cy > wCanvas.height - MARGIN) break;
+    }
+
+    words.push({ text, x: cx, y: cy, w, erased: false });
+    cx += w + WORD_GAP;
+  }
+}
+ 
+function renderWords() {
+  wCtx.clearRect(0, 0, wCanvas.width, wCanvas.height);
+  wCtx.font = FONT_STR;
+  wCtx.fillStyle = '#000';
+  words.forEach(w => {
+    if (!w.erased) wCtx.fillText(w.text, w.x, w.y);
+  });
+}
+ 
+buildWords();
+renderWords();
+ 
+// ── phase control ──
+// 'explore' → click 'start' → 'erasing' → all gone → 'rpo' → drop rpo → slide it away → 'done'
+let gamePhase = 'explore';
+let mouseX = -999, mouseY = -999;
+ 
+document.addEventListener('mousemove', e => {
+  mouseX = e.clientX;
+  mouseY = e.clientY;
+ 
+  if (gamePhase === 'erasing') {
+    eraserEl.style.left = mouseX + 'px';
+    eraserEl.style.top  = mouseY + 'px';
+    eraseAt(mouseX, mouseY);
+  }
+ 
+});
+ 
+// ── click to find 'start' ──
+wCanvas.addEventListener('click', e => {
+  if (gamePhase !== 'explore') return;
+  const cx = e.clientX, cy = e.clientY;
+  const hit = words.find(w =>
+    !w.erased &&
+    w.text === 'start' &&
+    cx >= w.x && cx <= w.x + w.w &&
+    cy >= w.y - FONT_SIZE && cy <= w.y + 4
+  );
+  if (hit) {
+    gamePhase = 'erasing';
+    eraserEl.style.display = 'block';
+    wCanvas.style.cursor = 'none';
+  }
+});
+ 
+// ── erase words under cursor ──
+function eraseAt(mx, my) {
+  const hw = ERASER_W / 2, hh = ERASER_H / 2;
+  let anyErased = false;
+  words.forEach(w => {
+    if (w.erased) return;
+    // word bounding box: x to x+w, y-FONT_SIZE to y+4
+    const overlapX = mx + hw > w.x && mx - hw < w.x + w.w;
+    const overlapY = my + hh > w.y - FONT_SIZE && my - hh < w.y + 4;
+    if (overlapX && overlapY) {
+      w.erased = true;
+      anyErased = true;
+    }
+  });
+  if (anyErased) {
+    renderWords();
+    checkAllErased();
+  }
+}
+ 
+function checkAllErased() {
+  const allGone = words.every(w => w.erased === true);
+
+  if (allGone) {
+    gamePhase = 'rpo';
+    eraserEl.style.display = 'none';
+    wCanvas.style.cursor = 'default';
+
+    wCtx.clearRect(0, 0, wCanvas.width, wCanvas.height);
+
+    requestAnimationFrame(() => {
+      showRPO();
+    });
+  }
+}
+// ── RPO ──
+const rpoEl = document.getElementById('rpo-block');
+let rpoDragging = false;
+let rpoDragOffsetX = 0;
+let rpoFloorY = 0;
+let rpoSolved = false;
+ 
+function showRPO() {
+  rpoEl.classList.add('visible');
+  setTimeout(() => {
+    gamePhase = 'rpo_drop';
+    rpoEl.classList.add('ready-to-drop');
+  }, 2000);
+}
+
+function handleRpoPointerDown(e) {
+  if (rpoSolved) return;
+  if (gamePhase === 'rpo_drop') {
+    dropRpoToFloor();
+    return;
+  }
+  if (gamePhase !== 'rpo_slide') return;
+
+  const r = rpoEl.getBoundingClientRect();
+  const centerX = r.left + r.width / 2;
+  rpoDragOffsetX = e.clientX - centerX;
+  rpoDragging = true;
+  rpoEl.classList.add('dragging');
+  if (typeof rpoEl.setPointerCapture === 'function') {
+    rpoEl.setPointerCapture(e.pointerId);
+  }
+}
+
+function dropRpoToFloor() {
+  const r = rpoEl.getBoundingClientRect();
+  const centerX = r.left + r.width / 2;
+  const centerY = r.top + r.height / 2;
+  rpoFloorY = window.innerHeight - r.height / 2 - 28;
+  gamePhase = 'rpo_falling';
+  rpoEl.classList.remove('ready-to-drop');
+  rpoEl.style.left = centerX + 'px';
+  rpoEl.style.top = centerY + 'px';
+  rpoEl.style.transform = 'translate(-50%, -50%)';
+  rpoEl.getBoundingClientRect();
+  rpoEl.style.top = rpoFloorY + 'px';
+
+  setTimeout(() => {
+    if (rpoSolved) return;
+    gamePhase = 'rpo_slide';
+    rpoEl.classList.add('ready-to-slide');
+  }, 780);
+}
+
+function moveRpo(e) {
+  if (!rpoDragging || rpoSolved) return;
+  const nextX = e.clientX - rpoDragOffsetX;
+  rpoEl.style.left = nextX + 'px';
+  rpoEl.style.top = rpoFloorY + 'px';
+  checkRpoSlidAway();
+}
+
+function stopRpoDrag() {
+  if (!rpoDragging) return;
+  rpoDragging = false;
+  rpoEl.classList.remove('dragging');
+}
+
+function checkRpoSlidAway() {
+  const r = rpoEl.getBoundingClientRect();
+  const outside =
+    r.left < -r.width * 0.35 ||
+    r.right > window.innerWidth + r.width * 0.35;
+
+  if (!outside || rpoSolved) return;
+  rpoSolved = true;
+  rpoDragging = false;
+  gamePhase = 'done';
+  rpoEl.classList.remove('ready-to-drop', 'ready-to-slide', 'dragging');
+  rpoEl.style.opacity = '0';
+  launchConfetti();
+  setTimeout(goToLevel2, 2200);
+}
+
+rpoEl.addEventListener('pointerdown', handleRpoPointerDown);
+document.addEventListener('pointermove', moveRpo);
+document.addEventListener('pointerup', stopRpoDrag);
+document.addEventListener('pointercancel', stopRpoDrag);
+ 
+// ══════════════════════════════════════
+// LEVEL 2
+// ══════════════════════════════════════
+const bgPhrase = "write a poem that rhymes a lot and then you might just win the pot but if you cheat with a chatbot the world will know your brain's all rot at least 4 lines 3 rhyming pairs 20 words or more ";
+ 
+function buildBgText() {
+  let t = '';
+  for (let i = 0; i < 500; i++) t += bgPhrase;
+  document.getElementById('bg-text').textContent = t;
+}
+ 
+function goToLevel2() {
+  document.getElementById('level1').style.display = 'none';
+  rpoEl.style.display = 'none';
+  buildBgText();
+  document.getElementById('level2').style.display = 'block';
+  setTimeout(() => document.getElementById('poem-input').focus(), 100);
+}
+ 
+function doRhyme(a, b) {
+  a = a.toLowerCase().replace(/[^a-z]/g,'');
+  b = b.toLowerCase().replace(/[^a-z]/g,'');
+  if (!a || !b || a === b) return false;
+  if (a.slice(-2) === b.slice(-2)) return true;
+  if (a.length > 2 && a.slice(-1) === b.slice(-1) && 'aeiouy'.includes(a.slice(-1))) return true;
+  const pairs = [
+    ['ight','ite'],['ow','oe'],['oo','ew'],['oo','ue'],['ay','ey'],
+    ['air','are'],['ire','ier'],['ate','ait'],['ine','ign'],['ing','ying'],
+    ['all','awl'],['ack','ak'],['ound','ownd'],['ong','ang'],['est','est']
+  ];
+  const ea = a.slice(-3), eb = b.slice(-3);
+  for (const [x,y] of pairs) {
+    if ((ea.endsWith(x)&&eb.endsWith(y))||(ea.endsWith(y)&&eb.endsWith(x))) return true;
+  }
+  return false;
+}
+ 
+function checkPoem(text) {
+  const lines = text.split('\n').map(l=>l.trim()).filter(l=>l.length>0);
+  if (lines.length < 4) return { ok:false, msg:'needs more lines.' };
+  if (text.split(/\s+/).filter(w=>w).length < 20) return { ok:false, msg:'needs more words.' };
+  const ends = lines.map(l => l.split(/\s+/).pop());
+  let pairs = 0;
+  const used = new Set();
+  for (let i=0;i<ends.length;i++) for (let j=i+1;j<ends.length;j++) {
+    if (!used.has(i)&&!used.has(j)&&doRhyme(ends[i],ends[j])) { pairs++; used.add(i); used.add(j); }
+  }
+  if (pairs < 2) return { ok:false, msg:`only ${pairs} rhyme(s) found. try again.` };
+  return { ok:true };
+}
+ 
+document.getElementById('poem-submit').addEventListener('click', () => {
+  const text = document.getElementById('poem-input').value;
+  const result = checkPoem(text);
+  const fb = document.getElementById('poem-feedback');
+  if (!result.ok) {
+    fb.textContent = result.msg + ' starting over.';
+    setTimeout(() => location.reload(), 2500);
+    return;
+  }
+  fb.textContent = '';
+  document.getElementById('level2').style.display = 'none';
+  const hm = document.getElementById('hot-msg');
+  hm.style.opacity = '1';
+  launchConfetti();
+  setTimeout(() => { hm.style.opacity = '0'; setTimeout(goToLevel3, 600); }, 2800);
+});
+ 
+document.getElementById('poem-input').addEventListener('keydown', e => {
+  if (e.key==='Enter' && e.ctrlKey) document.getElementById('poem-submit').click();
+});
+ 
+// ══════════════════════════════════════
+// LEVEL 3
+// ══════════════════════════════════════
+function goToLevel3() {
+  document.getElementById('level3').style.display = 'block';
+}
+ 
+document.getElementById('chess-submit').addEventListener('click', () => {
+  const ans = document.getElementById('chess-input').value.trim().toLowerCase();
+  const fb  = document.getElementById('chess-feedback');
+  if (![
+    'fetch me this cup',
+    '"fetch me this cup"',
+    "'fetch me this cup'",
+    'fetch me this cup.'
+  ].includes(ans)) {
+    fb.textContent = 'wrong. starting over.';
+    setTimeout(() => location.reload(), 2200);
+    return;
+  }
+  fb.textContent = '';
+  launchConfetti();
+  setTimeout(launchConfetti, 450);
+  setTimeout(() => {
+    const ov = document.getElementById('video-overlay');
+    ov.style.display = 'flex';
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      ov.style.opacity = '1';
+      ov.classList.add('visible');
+      document.getElementById('yt-frame').src =
+        'https://www.youtube.com/embed/nz3IuNQArL8?autoplay=1&rel=0';
+    }));
+  }, 1400);
+});
+ 
+document.getElementById('chess-input').addEventListener('keydown', e => {
+  if (e.key==='Enter') document.getElementById('chess-submit').click();
+});
+</script>
+</body>
+</html>
+ 
