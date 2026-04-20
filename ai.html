@@ -19,6 +19,11 @@
     position: fixed; top: 0; left: 0;
     pointer-events: none; z-index: 400;
   }
+
+  #fire-canvas {
+    position: fixed; top: 0; left: 0;
+    pointer-events: none; z-index: 390;
+  }
  
   /* ══ LEVEL 1 ══ */
   #level1 {
@@ -337,6 +342,7 @@
 <body>
  
 <canvas id="confetti-canvas"></canvas>
+<canvas id="fire-canvas"></canvas>
 <div id="eraser"></div>
  
 <!-- LEVEL 1 -->
@@ -500,6 +506,101 @@ function animateConfetti() {
     confCtx.clearRect(0,0,confCanvas.width,confCanvas.height);
   }
 }
+
+// ══════════════════════════════════════
+// SPARKS
+// ══════════════════════════════════════
+const fireCanvas = document.getElementById('fire-canvas');
+const fireCtx = fireCanvas.getContext('2d');
+fireCanvas.width = window.innerWidth;
+fireCanvas.height = window.innerHeight;
+window.addEventListener('resize', () => {
+  fireCanvas.width = window.innerWidth;
+  fireCanvas.height = window.innerHeight;
+});
+
+let fireParticles = [];
+let fireAnimating = false;
+
+function addSparkBurst(x, y, count, angle, spread, power) {
+  const colors = ['#fff7bf', '#ffe45c', '#ffb02e', '#ff7a1a', '#ffffff'];
+
+  for (let i = 0; i < count; i++) {
+    const a = angle + (Math.random() - 0.5) * spread;
+    const speed = power * (0.45 + Math.random() * 1.1);
+    fireParticles.push({
+      x,
+      y,
+      vx: Math.cos(a) * speed,
+      vy: Math.sin(a) * speed,
+      len: 8 + Math.random() * 22,
+      w: 1 + Math.random() * 2.5,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      life: 1,
+      decay: 0.018 + Math.random() * 0.02
+    });
+  }
+}
+
+function launchSparks() {
+  const w = fireCanvas.width;
+  const h = fireCanvas.height;
+  fireParticles = [];
+
+  addSparkBurst(w * 0.5, h + 20, 660, -Math.PI / 2, Math.PI * 0.82, 13);
+  addSparkBurst(-20, h * 0.66, 270, -0.35, Math.PI * 0.32, 10);
+  addSparkBurst(w + 20, h * 0.66, 270, Math.PI + 0.35, Math.PI * 0.32, 10);
+  addSparkBurst(w * 0.5, -20, 420, Math.PI / 2, Math.PI * 0.75, 10);
+  addSparkBurst(w * 0.2, -20, 180, Math.PI / 2.35, Math.PI * 0.35, 9);
+  addSparkBurst(w * 0.8, -20, 180, Math.PI / 1.55, Math.PI * 0.35, 9);
+  setTimeout(() => addSparkBurst(w * 0.5, h + 20, 390, -Math.PI / 2, Math.PI * 0.7, 11), 420);
+  setTimeout(() => addSparkBurst(w * 0.5, -20, 300, Math.PI / 2, Math.PI * 0.65, 9), 720);
+
+  if (!fireAnimating) {
+    fireAnimating = true;
+    animateSparks();
+  }
+}
+
+function animateSparks() {
+  fireCtx.clearRect(0, 0, fireCanvas.width, fireCanvas.height);
+  fireCtx.globalCompositeOperation = 'lighter';
+  fireParticles = fireParticles.filter(p => p.life > 0);
+
+  fireParticles.forEach(p => {
+    const angle = Math.atan2(p.vy, p.vx);
+    const tailX = p.x - Math.cos(angle) * p.len;
+    const tailY = p.y - Math.sin(angle) * p.len;
+
+    fireCtx.save();
+    fireCtx.globalAlpha = Math.max(0, p.life);
+    fireCtx.strokeStyle = p.color;
+    fireCtx.lineWidth = p.w;
+    fireCtx.lineCap = 'round';
+    fireCtx.beginPath();
+    fireCtx.moveTo(tailX, tailY);
+    fireCtx.lineTo(p.x, p.y);
+    fireCtx.stroke();
+    fireCtx.fillStyle = p.color;
+    fireCtx.beginPath();
+    fireCtx.arc(p.x, p.y, p.w * 1.2, 0, Math.PI * 2);
+    fireCtx.fill();
+    fireCtx.restore();
+
+    p.x += p.vx;
+    p.y += p.vy;
+    p.vx *= 0.984;
+    p.vy = p.vy * 0.984 + 0.12;
+    p.life -= p.decay;
+  });
+
+  fireCtx.globalCompositeOperation = 'source-over';
+  if (fireParticles.length > 0) requestAnimationFrame(animateSparks);
+  else {
+    fireAnimating = false;
+    fireCtx.clearRect(0, 0, fireCanvas.width, fireCanvas.height);
+  }
+}
  
 // ══════════════════════════════════════
 // LEVEL 1 — ERASER MECHANIC
@@ -518,7 +619,7 @@ const FONT_STR = `${FONT_SIZE}px "Times New Roman", serif`;
 const LINE_H = 26;
 const WORD_GAP = 10;
 const MARGIN = 30;
-const START_REVEAL_DISTANCE = 38;
+const START_REVEAL_DISTANCE = 45;
  
 wCtx.font = FONT_STR;
  
@@ -872,7 +973,7 @@ document.getElementById('poem-submit').addEventListener('click', () => {
   document.getElementById('level2').style.display = 'none';
   const hm = document.getElementById('hot-msg');
   hm.style.opacity = '1';
-  launchConfetti();
+  launchSparks();
   setTimeout(() => { hm.style.opacity = '0'; setTimeout(goToLevel3, 600); }, 2800);
 });
  
