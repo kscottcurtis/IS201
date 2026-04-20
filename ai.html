@@ -21,7 +21,18 @@
   }
  
   /* ══ LEVEL 1 ══ */
-  #level1 { position: fixed; inset: 0; background: #fff; }
+  #level1 {
+    position: fixed; inset: 0;
+    background:
+      radial-gradient(circle at 18% 14%, rgba(255,255,255,0.32), transparent 23%),
+      radial-gradient(circle at 78% 22%, rgba(121, 78, 28, 0.08), transparent 20%),
+      radial-gradient(circle at 34% 78%, rgba(142, 98, 35, 0.075), transparent 24%),
+      radial-gradient(circle at 88% 86%, rgba(255,255,255,0.18), transparent 18%),
+      repeating-radial-gradient(circle at 20% 30%, rgba(91, 62, 28, 0.045) 0 1px, transparent 1px 5px),
+      repeating-linear-gradient(7deg, rgba(99, 68, 30, 0.028) 0 1px, transparent 1px 9px),
+      linear-gradient(180deg, #eadba7 0%, #f2e5bf 44%, #dfcc92 100%);
+    background-size: auto, auto, auto, auto, 120px 120px, 180px 180px, auto;
+  }
  
   #word-canvas {
     position: absolute; top: 0; left: 0;
@@ -35,6 +46,7 @@
     font-family: "Times New Roman", serif;
     font-size: 0.9rem;
     color: #000;
+    opacity: 0.28;
     pointer-events: none;
     z-index: 5;
     user-select: none;
@@ -61,7 +73,11 @@
     white-space: nowrap;
     opacity: 0; pointer-events: none;
     transition: opacity 1.8s ease, top 0.75s cubic-bezier(.18,.89,.32,1.28), left 0.12s linear;
-    z-index: 50; user-select: none;
+    z-index: 50;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: none;
+    -webkit-user-drag: none;
   }
   #rpo-block.visible { opacity: 1; }
   #rpo-block.ready-to-drop { pointer-events: auto; cursor: pointer; }
@@ -70,13 +86,22 @@
  
   /* ══ LEVEL 2 ══ */
   #level2 {
-    position: fixed; inset: 0; background: #fff;
+    position: fixed; inset: 0;
+    background:
+      radial-gradient(circle at 22% 16%, rgba(255,255,255,0.3), transparent 28%),
+      radial-gradient(circle at 72% 28%, rgba(121, 78, 28, 0.08), transparent 22%),
+      radial-gradient(circle at 36% 82%, rgba(142, 98, 35, 0.075), transparent 25%),
+      radial-gradient(circle at 82% 82%, rgba(255,255,255,0.16), transparent 20%),
+      repeating-radial-gradient(circle at 20% 30%, rgba(91, 62, 28, 0.045) 0 1px, transparent 1px 5px),
+      repeating-linear-gradient(7deg, rgba(99, 68, 30, 0.028) 0 1px, transparent 1px 9px),
+      linear-gradient(180deg, #eadba7 0%, #f2e5bf 44%, #dfcc92 100%);
+    background-size: auto, auto, auto, auto, 120px 120px, 180px 180px, auto;
     display: none; overflow: hidden;
   }
   #bg-text {
     position: absolute; inset: 0;
     font-family: "Times New Roman", serif;
-    font-size: 1rem; line-height: 1.7; color: #000;
+    font-size: 1rem; line-height: 1.7; color: rgba(31, 21, 10, 0.8);
     padding: 14px; word-break: break-word;
     pointer-events: none; overflow: hidden;
   }
@@ -85,7 +110,7 @@
     position: absolute; top: 50%; left: 50%;
     transform: translate(-50%, -50%);
     width: 400px; height: 200px;
-    background: #fff;
+    background: rgba(242, 229, 191, 0.96);
     z-index: 5;
   }
   #poem-input {
@@ -117,9 +142,24 @@
     position: fixed; inset: 0;
     display: flex; align-items: center; justify-content: center;
     pointer-events: none; opacity: 0; z-index: 150;
-    transition: opacity 0.5s; background: #fff;
+    transition: opacity 0.5s;
+    background:
+      radial-gradient(circle at 50% 62%, rgba(255,255,255,0.28), transparent 16%),
+      radial-gradient(ellipse at 18% 100%, #ffe45c 0 8%, #ff8d24 16%, transparent 33%),
+      radial-gradient(ellipse at 38% 100%, #fff2a8 0 7%, #ffb02e 15%, #d82e12 31%, transparent 47%),
+      radial-gradient(ellipse at 57% 100%, #ffe45c 0 9%, #ff6a20 19%, #b51f10 36%, transparent 53%),
+      radial-gradient(ellipse at 78% 100%, #fff0a1 0 7%, #ff9829 17%, #cb2a12 34%, transparent 50%),
+      linear-gradient(180deg, #150606 0%, #4d100b 48%, #120302 100%);
+    background-size: auto, 48% 95%, 46% 110%, 52% 100%, 44% 105%, auto;
+    background-position: center, left bottom, 28% bottom, 62% bottom, right bottom, center;
+    background-repeat: no-repeat;
   }
-  #hot-msg span { font-family: "Times New Roman", serif; font-size: 3rem; color: #000; }
+  #hot-msg span {
+    font-family: "Times New Roman", serif;
+    font-size: clamp(2.4rem, 6vw, 5rem);
+    color: #fff3b0;
+    text-shadow: 0 3px 16px rgba(0,0,0,0.65), 0 0 28px rgba(255, 180, 45, 0.85);
+  }
  
   /* ══ LEVEL 3 ══ */
   #level3 {
@@ -316,7 +356,7 @@
   <div id="level1-hint">find the start button</div>
   <canvas id="word-canvas"></canvas>
 </div>
-<div id="rpo-block">ready player one</div>
+<div id="rpo-block">Ready Player One</div>
  
 <!-- LEVEL 2 -->
 <div id="level2">
@@ -352,7 +392,7 @@
     In order to embrace these jewels you have to follow all my rules<br>
     And if you're thinking this is fun just know your work has just begun<br>
     For there's a secret you must learn that one could only hope to earn,<br>
-    "Fetch me this cup" a girl once said--but what if it was you instead?
+    "Fetch me that cup" a girl once said--but what if it was you instead?
   </div>
   <div id="chess-form">
     <input id="chess-input" type="text" autocomplete="off"/>
@@ -429,6 +469,7 @@ const FONT_STR = `${FONT_SIZE}px "Times New Roman", serif`;
 const LINE_H = 26;
 const WORD_GAP = 10;
 const MARGIN = 30;
+const START_REVEAL_DISTANCE = 90;
  
 wCtx.font = FONT_STR;
  
@@ -444,7 +485,7 @@ const wordBank = [
   'people','over','down','only','may','after','before','must','well','back',
   'also','around','another','came','come','work','three','word','long','little',
   'very','thing','place','every','found','still','should','between','under',
-  'never','same','last','thought','city','tree','start','ready','go','begin','game','button',
+  'never','same','last','thought','city','tree','ready','go','begin','game','button',
   'where','find','press','play','find','almost','player','intro','wes','princess',
   'bride','butter','giant','gold','peanut','castle','kingdom','book','poison',
   'mask','fairytail','time','once','upon','awesome','true','love','kiss','romance',
@@ -454,10 +495,12 @@ const wordBank = [
  
 // ── build word positions (book-page layout) ──
 let words = []; // { text, x, y, w, erased }
+let highlightedStartWord = null;
  
 function buildWords() {
   words = [];
   let cx = MARGIN, cy = MARGIN + FONT_SIZE;
+  let possibleStartSlots = [];
 
   while (cy <= wCanvas.height - MARGIN) {
     const text = wordBank[Math.floor(Math.random() * wordBank.length)];
@@ -471,8 +514,15 @@ function buildWords() {
     }
 
     words.push({ text, x: cx, y: cy, w, erased: false });
+    if (cy > MARGIN + LINE_H && cy < wCanvas.height - MARGIN - LINE_H) {
+      possibleStartSlots.push(words.length - 1);
+    }
     cx += w + WORD_GAP;
   }
+
+  const startSlot = possibleStartSlots[Math.floor(Math.random() * possibleStartSlots.length)] ?? Math.floor(words.length / 2);
+  words[startSlot].text = 'start';
+  words[startSlot].w = wCtx.measureText('start').width;
 }
  
 function renderWords() {
@@ -480,8 +530,39 @@ function renderWords() {
   wCtx.font = FONT_STR;
   wCtx.fillStyle = '#000';
   words.forEach(w => {
-    if (!w.erased) wCtx.fillText(w.text, w.x, w.y);
+    if (w.erased) return;
+
+    if (w === highlightedStartWord) {
+      wCtx.save();
+      wCtx.font = `bold 24px "Times New Roman", serif`;
+      wCtx.fillStyle = 'rgba(192, 24, 24, 0.42)';
+      wCtx.shadowColor = 'rgba(192, 24, 24, 0.12)';
+      wCtx.shadowBlur = 5;
+      wCtx.fillText(w.text, w.x - 4, w.y - 8);
+      wCtx.restore();
+      return;
+    }
+
+    wCtx.fillText(w.text, w.x, w.y);
   });
+}
+
+function findNearbyStartWord(mx, my) {
+  return words.find(w => {
+    if (w.erased || w.text !== 'start') return false;
+    const centerX = w.x + w.w / 2;
+    const centerY = w.y - FONT_SIZE / 2;
+    return Math.hypot(mx - centerX, my - centerY) <= START_REVEAL_DISTANCE;
+  }) || null;
+}
+
+function updateStartHint(mx, my) {
+  if (gamePhase !== 'explore') return;
+  const nextHighlight = findNearbyStartWord(mx, my);
+  if (nextHighlight !== highlightedStartWord) {
+    highlightedStartWord = nextHighlight;
+    renderWords();
+  }
 }
  
 buildWords();
@@ -495,6 +576,8 @@ let mouseX = -999, mouseY = -999;
 document.addEventListener('mousemove', e => {
   mouseX = e.clientX;
   mouseY = e.clientY;
+
+  updateStartHint(mouseX, mouseY);
  
   if (gamePhase === 'erasing') {
     eraserEl.style.left = mouseX + 'px';
@@ -513,9 +596,11 @@ wCanvas.addEventListener('click', e => {
     w.text === 'start' &&
     cx >= w.x && cx <= w.x + w.w &&
     cy >= w.y - FONT_SIZE && cy <= w.y + 4
-  );
+  ) || findNearbyStartWord(cx, cy);
   if (hit) {
     gamePhase = 'erasing';
+    highlightedStartWord = null;
+    renderWords();
     eraserEl.style.display = 'block';
     wCanvas.style.cursor = 'none';
   }
@@ -560,7 +645,7 @@ function checkAllErased() {
 const rpoEl = document.getElementById('rpo-block');
 let rpoDragging = false;
 let rpoDragOffsetX = 0;
-let rpoFloorY = 0;
+let rpoDragOffsetY = 0;
 let rpoSolved = false;
  
 function showRPO() {
@@ -572,6 +657,7 @@ function showRPO() {
 }
 
 function handleRpoPointerDown(e) {
+  e.preventDefault();
   if (rpoSolved) return;
   if (gamePhase === 'rpo_drop') {
     dropRpoToFloor();
@@ -581,7 +667,9 @@ function handleRpoPointerDown(e) {
 
   const r = rpoEl.getBoundingClientRect();
   const centerX = r.left + r.width / 2;
+  const centerY = r.top + r.height / 2;
   rpoDragOffsetX = e.clientX - centerX;
+  rpoDragOffsetY = e.clientY - centerY;
   rpoDragging = true;
   rpoEl.classList.add('dragging');
   if (typeof rpoEl.setPointerCapture === 'function') {
@@ -593,14 +681,14 @@ function dropRpoToFloor() {
   const r = rpoEl.getBoundingClientRect();
   const centerX = r.left + r.width / 2;
   const centerY = r.top + r.height / 2;
-  rpoFloorY = window.innerHeight - r.height / 2 - 28;
+  const floorY = window.innerHeight - r.height / 2 - 28;
   gamePhase = 'rpo_falling';
   rpoEl.classList.remove('ready-to-drop');
   rpoEl.style.left = centerX + 'px';
   rpoEl.style.top = centerY + 'px';
   rpoEl.style.transform = 'translate(-50%, -50%)';
   rpoEl.getBoundingClientRect();
-  rpoEl.style.top = rpoFloorY + 'px';
+  rpoEl.style.top = floorY + 'px';
 
   setTimeout(() => {
     if (rpoSolved) return;
@@ -611,10 +699,12 @@ function dropRpoToFloor() {
 
 function moveRpo(e) {
   if (!rpoDragging || rpoSolved) return;
+  e.preventDefault();
   const nextX = e.clientX - rpoDragOffsetX;
+  const nextY = e.clientY - rpoDragOffsetY;
   rpoEl.style.left = nextX + 'px';
-  rpoEl.style.top = rpoFloorY + 'px';
-  checkRpoSlidAway();
+  rpoEl.style.top = nextY + 'px';
+  checkRpoReachedEdge();
 }
 
 function stopRpoDrag() {
@@ -623,13 +713,15 @@ function stopRpoDrag() {
   rpoEl.classList.remove('dragging');
 }
 
-function checkRpoSlidAway() {
+function checkRpoReachedEdge() {
   const r = rpoEl.getBoundingClientRect();
-  const outside =
-    r.left < -r.width * 0.35 ||
-    r.right > window.innerWidth + r.width * 0.35;
+  const reachedEdge =
+    r.left <= 8 ||
+    r.right >= window.innerWidth - 8 ||
+    r.top <= 8 ||
+    r.bottom >= window.innerHeight - 8;
 
-  if (!outside || rpoSolved) return;
+  if (!reachedEdge || rpoSolved) return;
   rpoSolved = true;
   rpoDragging = false;
   gamePhase = 'done';
@@ -648,6 +740,7 @@ document.addEventListener('pointercancel', stopRpoDrag);
 // LEVEL 2
 // ══════════════════════════════════════
 const bgPhrase = "write a poem that rhymes a lot and then you might just win the pot but if you cheat with a chatbot the world will know your brain's all rot at least 4 lines 3 rhyming pairs 20 words or more ";
+const POEM_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbxzQ6MzcDrHilm5LAbLhewfnX4lVn25dTzVxHSqC0Bdlu8kFBSViSBvo3bYeK0_Vt8UBA/exec';
  
 function buildBgText() {
   let t = '';
@@ -694,6 +787,47 @@ function checkPoem(text) {
   if (pairs < 2) return { ok:false, msg:`only ${pairs} rhyme(s) found. try again.` };
   return { ok:true };
 }
+
+function sendPoemToGoogleSheet(text) {
+  if (!POEM_WEBHOOK_URL) return;
+
+  const data = new URLSearchParams();
+  data.append('poem', text);
+  data.append('page', window.location.href);
+  data.append('userAgent', navigator.userAgent);
+  data.append('submittedAt', new Date().toISOString());
+
+  submitPoemWithHiddenForm(data);
+}
+
+function submitPoemWithHiddenForm(data) {
+  const frameName = 'poem-submit-frame';
+  let frame = document.querySelector(`iframe[name="${frameName}"]`);
+  if (!frame) {
+    frame = document.createElement('iframe');
+    frame.name = frameName;
+    frame.style.display = 'none';
+    document.body.appendChild(frame);
+  }
+
+  const form = document.createElement('form');
+  form.action = POEM_WEBHOOK_URL;
+  form.method = 'POST';
+  form.target = frameName;
+  form.style.display = 'none';
+
+  data.forEach((value, key) => {
+    const input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = key;
+    input.value = value;
+    form.appendChild(input);
+  });
+
+  document.body.appendChild(form);
+  form.submit();
+  setTimeout(() => form.remove(), 1000);
+}
  
 document.getElementById('poem-submit').addEventListener('click', () => {
   const text = document.getElementById('poem-input').value;
@@ -704,6 +838,7 @@ document.getElementById('poem-submit').addEventListener('click', () => {
     setTimeout(() => location.reload(), 2500);
     return;
   }
+  sendPoemToGoogleSheet(text);
   fb.textContent = '';
   document.getElementById('level2').style.display = 'none';
   const hm = document.getElementById('hot-msg');
@@ -727,10 +862,11 @@ document.getElementById('chess-submit').addEventListener('click', () => {
   const ans = document.getElementById('chess-input').value.trim().toLowerCase();
   const fb  = document.getElementById('chess-feedback');
   if (![
-    'fetch me this cup',
-    '"fetch me this cup"',
-    "'fetch me this cup'",
-    'fetch me this cup.'
+    'fetch me that cup',
+    '"fetch me that cup"',
+    "'fetch me that cup'",
+    'fetch me that cup.',
+    'Fetch me that cup'
   ].includes(ans)) {
     fb.textContent = 'wrong. starting over.';
     setTimeout(() => location.reload(), 2200);
@@ -746,7 +882,7 @@ document.getElementById('chess-submit').addEventListener('click', () => {
       ov.style.opacity = '1';
       ov.classList.add('visible');
       document.getElementById('yt-frame').src =
-        'https://www.youtube.com/embed/nz3IuNQArL8?autoplay=1&rel=0';
+        'https://www.youtube.com/embed/O6qpa-mRLnI?autoplay=1&rel=0';
     }));
   }, 1400);
 });
