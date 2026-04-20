@@ -24,14 +24,8 @@
   #level1 {
     position: fixed; inset: 0;
     background:
-      radial-gradient(circle at 18% 14%, rgba(255,255,255,0.32), transparent 23%),
-      radial-gradient(circle at 78% 22%, rgba(121, 78, 28, 0.08), transparent 20%),
-      radial-gradient(circle at 34% 78%, rgba(142, 98, 35, 0.075), transparent 24%),
-      radial-gradient(circle at 88% 86%, rgba(255,255,255,0.18), transparent 18%),
-      repeating-radial-gradient(circle at 20% 30%, rgba(91, 62, 28, 0.045) 0 1px, transparent 1px 5px),
-      repeating-linear-gradient(7deg, rgba(99, 68, 30, 0.028) 0 1px, transparent 1px 9px),
-      linear-gradient(180deg, #eadba7 0%, #f2e5bf 44%, #dfcc92 100%);
-    background-size: auto, auto, auto, auto, 120px 120px, 180px 180px, auto;
+      linear-gradient(180deg, rgba(255,255,255,0.18), rgba(95, 62, 26, 0.08)),
+      url("assets/img/paper.jpg") center center / cover no-repeat;
   }
  
   #word-canvas {
@@ -80,7 +74,7 @@
     -webkit-user-drag: none;
   }
   #rpo-block.visible { opacity: 1; }
-  #rpo-block.ready-to-drop { pointer-events: auto; cursor: pointer; }
+  #rpo-block.ready-to-move { pointer-events: auto; cursor: grab; }
   #rpo-block.ready-to-slide { pointer-events: auto; cursor: grab; }
   #rpo-block.dragging { cursor: grabbing; transition: none; }
  
@@ -88,14 +82,8 @@
   #level2 {
     position: fixed; inset: 0;
     background:
-      radial-gradient(circle at 22% 16%, rgba(255,255,255,0.3), transparent 28%),
-      radial-gradient(circle at 72% 28%, rgba(121, 78, 28, 0.08), transparent 22%),
-      radial-gradient(circle at 36% 82%, rgba(142, 98, 35, 0.075), transparent 25%),
-      radial-gradient(circle at 82% 82%, rgba(255,255,255,0.16), transparent 20%),
-      repeating-radial-gradient(circle at 20% 30%, rgba(91, 62, 28, 0.045) 0 1px, transparent 1px 5px),
-      repeating-linear-gradient(7deg, rgba(99, 68, 30, 0.028) 0 1px, transparent 1px 9px),
-      linear-gradient(180deg, #eadba7 0%, #f2e5bf 44%, #dfcc92 100%);
-    background-size: auto, auto, auto, auto, 120px 120px, 180px 180px, auto;
+      linear-gradient(180deg, rgba(255,255,255,0.18), rgba(95, 62, 26, 0.08)),
+      url("assets/img/paper.jpg") center center / cover no-repeat;
     display: none; overflow: hidden;
   }
   #bg-text {
@@ -110,7 +98,7 @@
     position: absolute; top: 50%; left: 50%;
     transform: translate(-50%, -50%);
     width: 400px; height: 200px;
-    background: rgba(242, 229, 191, 0.96);
+    background: rgba(235, 229, 216, 0.96);
     z-index: 5;
   }
   #poem-input {
@@ -424,19 +412,66 @@ window.addEventListener('resize', () => {
   confCanvas.height = window.innerHeight;
 });
 let confetti = [];
-function launchConfetti() {
-  for (let i = 0; i < 260; i++) {
+let confettiAnimating = false;
+
+function addConfettiBurst(x, y, count, angle, spread, power) {
+  const colors = [
+    '#fff7bf','#ffd84d','#f7b731','#ff5f57','#ff8d24',
+    '#6ccf67','#54a8ff','#9a74ff','#ffffff','#111111'
+  ];
+
+  for (let i = 0; i < count; i++) {
+    const a = angle + (Math.random() - 0.5) * spread;
+    const speed = power * (0.55 + Math.random() * 0.85);
+    const big = Math.random() < 0.12;
+    const coin = Math.random() < 0.16;
+
     confetti.push({
-      x: Math.random() * confCanvas.width,
-      y: -10 - Math.random() * 300,
-      w: 5 + Math.random() * 9, h: 3 + Math.random() * 6,
-      color: ['#000','#333','#666','#999','#ccc'][Math.floor(Math.random()*5)],
-      vx: (Math.random()-0.5)*6, vy: 2+Math.random()*5,
-      rot: Math.random()*360, vrot: (Math.random()-0.5)*12, life: 1
+      x,
+      y,
+      w: coin ? 9 + Math.random() * 9 : 4 + Math.random() * (big ? 18 : 10),
+      h: coin ? 9 + Math.random() * 9 : 3 + Math.random() * (big ? 10 : 7),
+      color: coin ? ['#ffd84d','#fff0a1','#e4b93f'][Math.floor(Math.random() * 3)] : colors[Math.floor(Math.random() * colors.length)],
+      vx: Math.cos(a) * speed,
+      vy: Math.sin(a) * speed,
+      rot: Math.random() * 360,
+      vrot: (Math.random() - 0.5) * (big ? 20 : 15),
+      life: 1.2 + Math.random() * 0.45,
+      gravity: 0.08 + Math.random() * 0.08,
+      drag: 0.988 + Math.random() * 0.008,
+      coin
     });
   }
-  animateConfetti();
 }
+
+function launchConfetti() {
+  const w = confCanvas.width;
+  const h = confCanvas.height;
+
+  addConfettiBurst(w * 0.5, -20, 260, Math.PI / 2, Math.PI * 0.9, 9);
+  addConfettiBurst(-20, h * 0.25, 190, -0.15, Math.PI * 0.5, 11);
+  addConfettiBurst(w + 20, h * 0.25, 190, Math.PI + 0.15, Math.PI * 0.5, 11);
+  addConfettiBurst(w * 0.18, h + 20, 160, -Math.PI / 2.4, Math.PI * 0.45, 13);
+  addConfettiBurst(w * 0.82, h + 20, 160, -Math.PI / 1.7, Math.PI * 0.45, 13);
+  addConfettiBurst(w * 0.5, h * 0.5, 110, -Math.PI / 2, Math.PI * 2, 7);
+
+  setTimeout(() => addConfettiBurst(w * 0.08, h * 0.55, 120, -0.45, Math.PI * 0.5, 10), 160);
+  setTimeout(() => addConfettiBurst(w * 0.92, h * 0.55, 120, Math.PI + 0.45, Math.PI * 0.5, 10), 260);
+  setTimeout(() => addConfettiBurst(w * 0.5, -20, 180, Math.PI / 2, Math.PI * 0.75, 8), 420);
+  setTimeout(() => {
+    addConfettiBurst(w * 0.25, -20, 170, Math.PI / 2.2, Math.PI * 0.7, 9);
+    addConfettiBurst(w * 0.75, -20, 170, Math.PI / 1.8, Math.PI * 0.7, 9);
+    addConfettiBurst(-20, h * 0.42, 120, -0.1, Math.PI * 0.42, 10);
+    addConfettiBurst(w + 20, h * 0.42, 120, Math.PI + 0.1, Math.PI * 0.42, 10);
+  }, 1350);
+  setTimeout(() => addConfettiBurst(w * 0.5, h + 20, 180, -Math.PI / 2, Math.PI * 0.65, 12), 1900);
+
+  if (!confettiAnimating) {
+    confettiAnimating = true;
+    animateConfetti();
+  }
+}
+
 function animateConfetti() {
   confCtx.clearRect(0,0,confCanvas.width,confCanvas.height);
   confetti = confetti.filter(p=>p.life>0);
@@ -444,12 +479,26 @@ function animateConfetti() {
     confCtx.save();
     confCtx.translate(p.x,p.y); confCtx.rotate(p.rot*Math.PI/180);
     confCtx.globalAlpha=p.life; confCtx.fillStyle=p.color;
-    confCtx.fillRect(-p.w/2,-p.h/2,p.w,p.h);
+    if (p.coin) {
+      confCtx.beginPath();
+      confCtx.ellipse(0, 0, p.w / 2, p.h / 2, 0, 0, Math.PI * 2);
+      confCtx.fill();
+    } else {
+      confCtx.fillRect(-p.w/2,-p.h/2,p.w,p.h);
+    }
     confCtx.restore();
-    p.x+=p.vx; p.y+=p.vy; p.rot+=p.vrot; p.vy+=0.15; p.life-=0.007;
+    p.x += p.vx;
+    p.y += p.vy;
+    p.rot += p.vrot;
+    p.vx *= p.drag;
+    p.vy = p.vy * p.drag + p.gravity;
+    p.life -= 0.0055;
   });
   if (confetti.length>0) requestAnimationFrame(animateConfetti);
-  else confCtx.clearRect(0,0,confCanvas.width,confCanvas.height);
+  else {
+    confettiAnimating = false;
+    confCtx.clearRect(0,0,confCanvas.width,confCanvas.height);
+  }
 }
  
 // ══════════════════════════════════════
@@ -469,7 +518,7 @@ const FONT_STR = `${FONT_SIZE}px "Times New Roman", serif`;
 const LINE_H = 26;
 const WORD_GAP = 10;
 const MARGIN = 30;
-const START_REVEAL_DISTANCE = 90;
+const START_REVEAL_DISTANCE = 38;
  
 wCtx.font = FONT_STR;
  
@@ -651,19 +700,15 @@ let rpoSolved = false;
 function showRPO() {
   rpoEl.classList.add('visible');
   setTimeout(() => {
-    gamePhase = 'rpo_drop';
-    rpoEl.classList.add('ready-to-drop');
+    gamePhase = 'rpo_move';
+    rpoEl.classList.add('ready-to-move');
   }, 2000);
 }
 
 function handleRpoPointerDown(e) {
   e.preventDefault();
   if (rpoSolved) return;
-  if (gamePhase === 'rpo_drop') {
-    dropRpoToFloor();
-    return;
-  }
-  if (gamePhase !== 'rpo_slide') return;
+  if (gamePhase !== 'rpo_move') return;
 
   const r = rpoEl.getBoundingClientRect();
   const centerX = r.left + r.width / 2;
@@ -671,30 +716,14 @@ function handleRpoPointerDown(e) {
   rpoDragOffsetX = e.clientX - centerX;
   rpoDragOffsetY = e.clientY - centerY;
   rpoDragging = true;
-  rpoEl.classList.add('dragging');
-  if (typeof rpoEl.setPointerCapture === 'function') {
-    rpoEl.setPointerCapture(e.pointerId);
-  }
-}
-
-function dropRpoToFloor() {
-  const r = rpoEl.getBoundingClientRect();
-  const centerX = r.left + r.width / 2;
-  const centerY = r.top + r.height / 2;
-  const floorY = window.innerHeight - r.height / 2 - 28;
-  gamePhase = 'rpo_falling';
-  rpoEl.classList.remove('ready-to-drop');
+  rpoEl.classList.remove('ready-to-move');
+  rpoEl.classList.add('ready-to-slide', 'dragging');
   rpoEl.style.left = centerX + 'px';
   rpoEl.style.top = centerY + 'px';
   rpoEl.style.transform = 'translate(-50%, -50%)';
-  rpoEl.getBoundingClientRect();
-  rpoEl.style.top = floorY + 'px';
-
-  setTimeout(() => {
-    if (rpoSolved) return;
-    gamePhase = 'rpo_slide';
-    rpoEl.classList.add('ready-to-slide');
-  }, 780);
+  if (typeof rpoEl.setPointerCapture === 'function') {
+    rpoEl.setPointerCapture(e.pointerId);
+  }
 }
 
 function moveRpo(e) {
@@ -725,7 +754,7 @@ function checkRpoReachedEdge() {
   rpoSolved = true;
   rpoDragging = false;
   gamePhase = 'done';
-  rpoEl.classList.remove('ready-to-drop', 'ready-to-slide', 'dragging');
+  rpoEl.classList.remove('ready-to-move', 'ready-to-slide', 'dragging');
   rpoEl.style.opacity = '0';
   launchConfetti();
   setTimeout(goToLevel2, 2200);
